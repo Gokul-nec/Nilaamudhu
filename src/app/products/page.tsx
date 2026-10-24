@@ -18,11 +18,17 @@ export async function generateMetadata({ searchParams }: { searchParams: SP }): 
 
 export default async function ProductsPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
-  const [lang, settings, categories] = await Promise.all([getLang(), getSettings(), getCategories()]);
-  const t = dictionaries[lang];
   const sort: SortKey = sp.sort === "price_asc" || sp.sort === "price_desc" ? sp.sort : "default";
   const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
-  const { products, total, pageCount, error } = await getProducts({ q: sp.q, categorySlug: sp.category, sort, page });
+
+  const [lang, settings, categories, productsRes] = await Promise.all([
+    getLang(),
+    getSettings(),
+    getCategories(),
+    getProducts({ q: sp.q, categorySlug: sp.category, sort, page }),
+  ]);
+  const t = dictionaries[lang];
+  const { products, total, pageCount, error } = productsRes;
   const filtered = Boolean(sp.q || sp.category);
   const activeCategory = categories.find((c) => c.slug === sp.category);
 

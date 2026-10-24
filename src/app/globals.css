@@ -301,6 +301,16 @@
   animation: carousel-plate-enter 440ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes carousel-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.carousel-progress-bar {
+  transform-origin: left;
+  animation: carousel-progress var(--carousel-duration, 5000ms) linear forwards;
+}
+
 html.splash-seen .splash-root { display: none !important; }
 
 @media (prefers-reduced-motion: reduce) {

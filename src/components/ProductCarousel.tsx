@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play, Sparkles, Wheat } from "lucide-react";
+import { useReducedMotion } from "framer-motion";
 import type { Lang, Product } from "@/lib/types";
 import { dictionaries } from "@/lib/i18n/dictionary";
 import { pick } from "@/lib/i18n/lang";
@@ -26,65 +27,40 @@ export function ProductCarousel({ products, lang, currency, intervalMs = 5000 }:
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isUserPaused, setIsUserPaused] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const prefersReduced = useReducedMotion();
+  const reducedMotion = Boolean(prefersReduced);
 
   const touchStartX = useRef<number | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const t = dictionaries[lang];
   const count = products.length;
 
-  // Listen for prefers-reduced-motion
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
   const nextSlide = useCallback(() => {
     setDirection("next");
     setIndex((prev) => (prev + 1) % count);
-    setProgress(0);
   }, [count]);
 
   const prevSlide = useCallback(() => {
     setDirection("prev");
     setIndex((prev) => (prev - 1 + count) % count);
-    setProgress(0);
   }, [count]);
 
   const goToSlide = (i: number) => {
     if (i === index) return;
     setDirection(i > index ? "next" : "prev");
     setIndex(i);
-    setProgress(0);
   };
 
   const isPaused = isUserPaused || isHovered || isFocused || reducedMotion;
 
-  // Auto-play interval with fine-grained progress bar
+  // Auto-play interval
   useEffect(() => {
     if (count <= 1 || isPaused) {
       if (timerRef.current) clearInterval(timerRef.current);
-      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
       return;
     }
-
-    const stepMs = 50;
-    const progressStep = (stepMs / intervalMs) * 100;
-
-    progressTimerRef.current = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) return 100;
-        return prev + progressStep;
-      });
-    }, stepMs);
 
     timerRef.current = setInterval(() => {
       nextSlide();
@@ -92,7 +68,6 @@ export function ProductCarousel({ products, lang, currency, intervalMs = 5000 }:
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
-      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
     };
   }, [count, isPaused, intervalMs, nextSlide]);
 
@@ -427,11 +402,15 @@ export function ProductCarousel({ products, lang, currency, intervalMs = 5000 }:
         </div>
       </div>
 
-      {/* Auto-play Timer Progress Bar */}
+      {/* Auto-play Timer Progress Bar (Pure CSS GPU-driven animation) */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-[var(--color-sand)]/30 overflow-hidden" aria-hidden>
         <div
-          className="h-full bg-[var(--color-forest-900)] transition-all duration-75 ease-linear"
-          style={{ width: `${isPaused ? progress : progress}%` }}
+          key={`${index}-${isPaused}`}
+          className="h-full bg-[var(--color-forest-900)] carousel-progress-bar"
+          style={{
+            ["--carousel-duration" as string]: `${intervalMs}ms`,
+            animationPlayState: isPaused ? "paused" : "running",
+          }}
         />
       </div>
 

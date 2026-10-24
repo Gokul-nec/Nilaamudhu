@@ -13,14 +13,14 @@ import { ProductCarousel } from "@/components/ProductCarousel";
 import { SectionHeading } from "@/components/ui";
 
 export default async function HomePage() {
-  const [lang, settings, categories, featuredRaw, productsRes] = await Promise.all([
+  const [lang, settings, categories, featuredRaw] = await Promise.all([
     getLang(),
     getSettings(),
     getCategories(),
     getFeaturedProducts(8),
-    getProducts({ page: 1 }),
   ]);
-  const rawFeatured = featuredRaw.length > 0 ? featuredRaw : productsRes.products.slice(0, 8);
+  const rawFeatured =
+    featuredRaw.length > 0 ? featuredRaw : (await getProducts({ page: 1 })).products.slice(0, 8);
   // Prioritize products with live Cloudinary photography for carousel showcase
   const featured = [...rawFeatured].sort((a, b) => {
     const hasA = (a.product_images && a.product_images.length > 0) ? 1 : 0;

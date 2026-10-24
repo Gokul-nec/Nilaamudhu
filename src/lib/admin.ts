@@ -2,7 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAdminAuth, getAdminDb, isAdminConfigured } from "./firebase/admin";
-import { SESSION_COOKIE } from "@/app/api/auth/session/route";
+import { SESSION_COOKIE } from "./auth-constants";
 
 export interface AdminSession {
   user: {

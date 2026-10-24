@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
+import { unstable_cache } from "next/cache";
 import type { Category, Lang, Product, SiteSettings } from "./types";
 import { getAdminDb, isAdminConfigured } from "./firebase/admin";
 import { displayPrice } from "./product-utils";
@@ -74,18 +75,24 @@ export function mapDocToProduct(doc: FirebaseFirestore.DocumentSnapshot): Produc
   };
 }
 
-export const getSettings = cache(async (): Promise<SiteSettings> => {
-  if (!isAdminConfigured()) return DEFAULT_SETTINGS;
-  try {
-    const db = getAdminDb();
-    if (!db) return DEFAULT_SETTINGS;
-    const doc = await db.collection("settings").doc("site").get();
-    if (!doc.exists) return DEFAULT_SETTINGS;
-    return { ...DEFAULT_SETTINGS, ...doc.data() } as SiteSettings;
-  } catch {
-    return DEFAULT_SETTINGS;
-  }
-});
+export const getSettings = cache(
+  unstable_cache(
+    async (): Promise<SiteSettings> => {
+      if (!isAdminConfigured()) return DEFAULT_SETTINGS;
+      try {
+        const db = getAdminDb();
+        if (!db) return DEFAULT_SETTINGS;
+        const doc = await db.collection("settings").doc("site").get();
+        if (!doc.exists) return DEFAULT_SETTINGS;
+        return { ...DEFAULT_SETTINGS, ...doc.data() } as SiteSettings;
+      } catch {
+        return DEFAULT_SETTINGS;
+      }
+    },
+    ["site-settings"],
+    { tags: ["settings"], revalidate: 3600 }
+  )
+);
 
 export const getLang = cache(async (): Promise<Lang> => {
   const stored = (await cookies()).get(LANG_COOKIE)?.value;
@@ -93,29 +100,35 @@ export const getLang = cache(async (): Promise<Lang> => {
   return (await getSettings()).default_language;
 });
 
-export const getCategories = cache(async (): Promise<Category[]> => {
-  if (!isAdminConfigured()) return [];
-  try {
-    const db = getAdminDb();
-    if (!db) return [];
-    const snap = await db.collection("categories").where("is_active", "==", true).get();
-    const categories: Category[] = snap.docs.map((d) => {
-      const data = d.data();
-      return {
-        id: d.id,
-        slug: data.slug || d.id,
-        name_en: data.name_en || "",
-        name_ta: data.name_ta ?? null,
-        image_path: data.image_path ?? null,
-        sort_order: Number(data.sort_order ?? 0),
-        is_active: data.is_active !== false,
-      };
-    });
-    return categories.sort((a, b) => a.sort_order - b.sort_order || a.name_en.localeCompare(b.name_en));
-  } catch {
-    return [];
-  }
-});
+export const getCategories = cache(
+  unstable_cache(
+    async (): Promise<Category[]> => {
+      if (!isAdminConfigured()) return [];
+      try {
+        const db = getAdminDb();
+        if (!db) return [];
+        const snap = await db.collection("categories").where("is_active", "==", true).get();
+        const categories: Category[] = snap.docs.map((d) => {
+          const data = d.data();
+          return {
+            id: d.id,
+            slug: data.slug || d.id,
+            name_en: data.name_en || "",
+            name_ta: data.name_ta ?? null,
+            image_path: data.image_path ?? null,
+            sort_order: Number(data.sort_order ?? 0),
+            is_active: data.is_active !== false,
+          };
+        });
+        return categories.sort((a, b) => a.sort_order - b.sort_order || a.name_en.localeCompare(b.name_en));
+      } catch {
+        return [];
+      }
+    },
+    ["active-categories"],
+    { tags: ["categories"], revalidate: 3600 }
+  )
+);
 
 export type SortKey = "default" | "price_asc" | "price_desc";
 
@@ -216,75 +229,95 @@ export async function getProducts(opts: {
 }
 
 export const getProductBySlug = cache(async (slug: string): Promise<Product | null> => {
-  if (!isAdminConfigured()) return null;
-  try {
-    const db = getAdminDb();
-    if (!db) return null;
-    const snap = await db
-      .collection("products")
-      .where("slug", "==", slug)
-      .where("status", "==", "active")
-      .limit(1)
-      .get();
-    if (snap.empty) return null;
-    const doc = snap.docs[0];
-    const product = mapDocToProduct(doc);
-    if (product.category_id) {
-      const catDoc = await db.collection("categories").doc(product.category_id).get();
-      if (catDoc.exists) {
-        const c = catDoc.data()!;
-        product.categories = {
-          id: catDoc.id,
-          slug: c.slug || catDoc.id,
-          name_en: c.name_en || "",
-          name_ta: c.name_ta ?? null,
-        };
+  return unstable_cache(
+    async (s: string): Promise<Product | null> => {
+      if (!isAdminConfigured()) return null;
+      try {
+        const db = getAdminDb();
+        if (!db) return null;
+        const snap = await db
+          .collection("products")
+          .where("slug", "==", s)
+          .where("status", "==", "active")
+          .limit(1)
+          .get();
+        if (snap.empty) return null;
+        const doc = snap.docs[0];
+        const product = mapDocToProduct(doc);
+        if (product.category_id) {
+          const categories = await getCategories();
+          const matched = categories.find((c) => c.id === product.category_id);
+          if (matched) {
+            product.categories = {
+              id: matched.id,
+              slug: matched.slug,
+              name_en: matched.name_en,
+              name_ta: matched.name_ta,
+            };
+          }
+        }
+        return product;
+      } catch {
+        return null;
       }
-    }
-    return product;
-  } catch {
-    return null;
-  }
+    },
+    [`product-${slug}`],
+    { tags: ["products", `product-${slug}`], revalidate: 3600 }
+  )(slug);
 });
 
 export const getFeaturedProducts = cache(async (limit = 8): Promise<Product[]> => {
-  if (!isAdminConfigured()) return [];
-  try {
-    const db = getAdminDb();
-    if (!db) return [];
-    const snap = await db
-      .collection("products")
-      .where("status", "==", "active")
-      .where("is_featured", "==", true)
-      .limit(limit)
-      .get();
-    const list = snap.docs.map(mapDocToProduct);
-    list.sort((a, b) => a.sort_order - b.sort_order);
-    return list;
-  } catch {
-    return [];
-  }
+  return unstable_cache(
+    async (lim: number): Promise<Product[]> => {
+      if (!isAdminConfigured()) return [];
+      try {
+        const db = getAdminDb();
+        if (!db) return [];
+        const snap = await db
+          .collection("products")
+          .where("status", "==", "active")
+          .where("is_featured", "==", true)
+          .limit(lim)
+          .get();
+        const list = snap.docs.map(mapDocToProduct);
+        list.sort((a, b) => a.sort_order - b.sort_order);
+        return list;
+      } catch {
+        return [];
+      }
+    },
+    [`featured-products-${limit}`],
+    { tags: ["products", "featured"], revalidate: 3600 }
+  )(limit);
 });
 
-export async function getRelatedProducts(product: Product, limit = 4): Promise<Product[]> {
+export const getRelatedProducts = cache(async (product: Product, limit = 4): Promise<Product[]> => {
   if (!isAdminConfigured() || !product.category_id) return [];
-  try {
-    const db = getAdminDb();
-    if (!db) return [];
-    const snap = await db
-      .collection("products")
-      .where("status", "==", "active")
-      .where("category_id", "==", product.category_id)
-      .limit(limit + 1)
-      .get();
-    return snap.docs
-      .map(mapDocToProduct)
-      .filter((p) => p.id !== product.id)
-      .slice(0, limit);
-  } catch {
-    return [];
-  }
-}
+  const categoryId = product.category_id;
+  const productId = product.id;
+  return unstable_cache(
+    async (catId: string, currentId: string, lim: number): Promise<Product[]> => {
+      try {
+        const db = getAdminDb();
+        if (!db) return [];
+        const snap = await db
+          .collection("products")
+          .where("status", "==", "active")
+          .where("category_id", "==", catId)
+          .limit(lim + 1)
+          .get();
+        return snap.docs
+          .map(mapDocToProduct)
+          .filter((p) => p.id !== currentId)
+          .slice(0, lim);
+      } catch {
+        return [];
+      }
+    },
+    [`related-${categoryId}-${productId}-${limit}`],
+    { tags: ["products"], revalidate: 3600 }
+  )(categoryId, productId, limit);
+});
 
 export async function getProductsByIds(ids: string[]): Promise<Map<string, Product>> {
   const map = new Map<string, Product>();

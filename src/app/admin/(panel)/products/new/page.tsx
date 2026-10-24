@@ -5,7 +5,7 @@ import type { ProductFormInput } from "@/lib/validation";
 
 export const metadata: Metadata = { title: "Add product" };
 
-export const emptyProduct: ProductFormInput = {
+const emptyProduct: ProductFormInput = {
   name_en: "",
   name_ta: "",
   slug: "",

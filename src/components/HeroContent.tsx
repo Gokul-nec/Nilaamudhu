@@ -25,22 +25,14 @@ function StatNumber({ value }: { value: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-20px" });
   const prefersReduced = useReducedMotion();
-  const [displayValue, setDisplayValue] = useState(prefersReduced ? value : "0%");
+  const [displayValue, setDisplayValue] = useState("0%");
 
   useEffect(() => {
-    if (!isInView || prefersReduced) {
-      if (prefersReduced) setDisplayValue(value);
-      return;
-    }
+    if (!isInView || prefersReduced) return;
 
     const match = value.match(/(\d+)(.*)/);
-    if (!match) {
-      setDisplayValue(value);
-      return;
-    }
-
-    const target = parseInt(match[1], 10);
-    const suffix = match[2] || "%";
+    const target = match ? parseInt(match[1], 10) : 0;
+    const suffix = match ? match[2] || "%" : value;
 
     const controls = animate(0, target, {
       duration: 1.2,
@@ -52,6 +44,10 @@ function StatNumber({ value }: { value: string }) {
 
     return () => controls.stop();
   }, [isInView, value, prefersReduced]);
+
+  if (prefersReduced) {
+    return <span>{value}</span>;
+  }
 
   return <span ref={ref}>{displayValue}</span>;
 }

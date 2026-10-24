@@ -1,11 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAdmin } from "@/lib/admin";
 import { categoryFormSchema, productFormSchema, settingsFormSchema } from "@/lib/validation";
-import { SESSION_COOKIE } from "@/app/api/auth/session/route";
+import { SESSION_COOKIE } from "@/lib/auth-constants";
 
 export type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
 
@@ -14,7 +14,16 @@ const firstIssue = (e: { issues: { path: PropertyKey[]; message: string }[] }) =
   const i = e.issues[0];
   return `${i.path.map(String).join(".") || "form"}: ${i.message}`;
 };
-const refresh = () => revalidatePath("/", "layout");
+const refresh = (tags: string[] = []) => {
+  for (const tag of tags) {
+    try {
+      updateTag(tag);
+    } catch {
+      // Ignore if called in environment without active cache context
+    }
+  }
+  revalidatePath("/", "layout");
+};
 
 /** Every action re-verifies the admin role on the server. The browser is never trusted. */
 async function admin() {
@@ -104,7 +113,7 @@ export async function saveProductAction(input: unknown, id: string | null): Prom
     productId = docRef.id;
   }
 
-  refresh();
+  refresh(["products", "featured"]);
   return { ok: true, id: productId ?? undefined };
 }
 
@@ -125,7 +134,7 @@ export async function setProductStatusAction(
     updated_at: new Date().toISOString(),
   });
 
-  refresh();
+  refresh(["products", "featured"]);
   return { ok: true };
 }
 
@@ -167,7 +176,7 @@ export async function saveCategoryAction(input: unknown, id: string | null): Pro
     });
   }
 
-  refresh();
+  refresh(["categories", "products"]);
   return { ok: true };
 }
 
@@ -192,7 +201,7 @@ export async function deleteCategoryAction(id: string): Promise<ActionResult> {
     await batch.commit();
   }
 
-  refresh();
+  refresh(["categories", "products"]);
   return { ok: true };
 }
 
@@ -208,7 +217,7 @@ export async function saveSettingsAction(input: unknown): Promise<ActionResult> 
   if (!parsed.success) return fail(firstIssue(parsed.error));
 
   await db.collection("settings").doc("site").set(parsed.data, { merge: true });
-  refresh();
+  refresh(["settings"]);
   return { ok: true };
 }
 

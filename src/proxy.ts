@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { SESSION_COOKIE } from "@/app/api/auth/session/route";
+import { SESSION_COOKIE } from "@/lib/auth-constants";
 
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
