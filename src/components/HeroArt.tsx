@@ -12,6 +12,7 @@ export function HeroArt({ className = "" }: { className?: string }) {
       {/* 1. Pulsing ambient backglow */}
       <div
         className="animate-pulse-soft pointer-events-none absolute h-72 w-72 sm:h-96 sm:w-96 rounded-full bg-gradient-to-tr from-[var(--color-gold-500)]/20 to-[var(--color-forest-700)]/15 blur-3xl"
+        style={{ transform: "translate3d(0,0,0)", willChange: "transform, opacity" }}
         aria-hidden
       />
 

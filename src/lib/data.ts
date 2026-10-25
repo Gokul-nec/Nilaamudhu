@@ -136,6 +136,24 @@ export function sanitizeSearch(q: string): string {
   return q.replace(/[,()%*\\_:"']/g, " ").replace(/\s+/g, " ").trim().slice(0, 60);
 }
 
+export const getAllActiveProducts = cache(async (): Promise<Product[]> => {
+  return unstable_cache(
+    async (): Promise<Product[]> => {
+      if (!isAdminConfigured()) return [];
+      try {
+        const db = getAdminDb();
+        if (!db) return [];
+        const snap = await db.collection("products").where("status", "==", "active").get();
+        return snap.docs.map(mapDocToProduct);
+      } catch {
+        return [];
+      }
+    },
+    ["all-active-products"],
+    { tags: ["products"], revalidate: 3600 }
+  )();
+});
+
 export async function getProducts(opts: {
   q?: string;
   categorySlug?: string;
@@ -151,9 +169,6 @@ export async function getProducts(opts: {
   const page = Math.max(1, opts.page ?? 1);
   if (!isAdminConfigured()) return { products: [], total: 0, page, pageCount: 1, error: false };
   try {
-    const db = getAdminDb();
-    if (!db) return { products: [], total: 0, page, pageCount: 1, error: false };
-
     let categoryId: string | null = null;
     if (opts.categorySlug) {
       const cats = await getCategories();
@@ -162,15 +177,12 @@ export async function getProducts(opts: {
       categoryId = matched.id;
     }
 
-    let query: FirebaseFirestore.Query = db.collection("products").where("status", "==", "active");
-    if (categoryId) {
-      query = query.where("category_id", "==", categoryId);
-    }
+    const rawAll = await getAllActiveProducts();
+    let all: Product[] = categoryId
+      ? rawAll.filter((p) => p.category_id === categoryId)
+      : [...rawAll];
 
-    const snap = await query.get();
-    let all: Product[] = snap.docs.map(mapDocToProduct);
-
-    // Populate category info
+    // Populate category info from cached categories
     const categories = await getCategories();
     const catMap = new Map(categories.map((c) => [c.id, c]));
     all.forEach((p) => {

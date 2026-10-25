@@ -22,6 +22,7 @@ export function CartDrawer() {
   const [failed, setFailed] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const lastFetchedItemsRef = useRef<string>("");
 
   const load = useCallback(async (signal: AbortSignal) => {
     if (items.length === 0) { setData(null); setFailed(false); return; }
@@ -33,6 +34,7 @@ export function CartDrawer() {
       });
       if (!res.ok) throw new Error("bad response");
       setData(await res.json());
+      lastFetchedItemsRef.current = JSON.stringify(items);
       setFailed(false);
     } catch (e) {
       if ((e as Error).name !== "AbortError") setFailed(true);
@@ -42,11 +44,19 @@ export function CartDrawer() {
   }, [items, lang]);
 
   useEffect(() => {
-    if (!isOpen || !hydrated) return;
+    if (!isOpen || !hydrated || items.length === 0) return;
+
+    const currentKey = JSON.stringify(items);
+    // When drawer reopens and items haven't changed, reuse already priced cart
+    if (data && currentKey === lastFetchedItemsRef.current) {
+      return;
+    }
+
     const controller = new AbortController();
-    const timer = setTimeout(() => load(controller.signal), 200);
+    const delay = data ? 200 : 0;
+    const timer = setTimeout(() => load(controller.signal), delay);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [isOpen, hydrated, load]);
+  }, [isOpen, hydrated, items, data, load]);
 
   useEffect(() => {
     if (!isOpen) return;

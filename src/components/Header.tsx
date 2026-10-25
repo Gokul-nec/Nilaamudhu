@@ -8,6 +8,7 @@ import { Menu, Search, ShoppingBasket, X, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCart, useLang } from "./Providers";
 import type { Lang } from "@/lib/types";
+import { pick } from "@/lib/i18n/lang";
 
 function LanguageToggle() {
   const { lang, setLang, switching } = useLang();
@@ -94,8 +95,17 @@ function SearchForm({ onDone, className = "" }: { onDone?: () => void; className
   );
 }
 
-export function Header({ businessName }: { businessName: string }) {
-  const { t } = useLang();
+export function Header({
+  businessName,
+  businessNameEn,
+  businessNameTa,
+}: {
+  businessName?: string;
+  businessNameEn?: string;
+  businessNameTa?: string;
+}) {
+  const { lang, t } = useLang();
+  const activeName = pick(lang, businessNameEn ?? businessName, businessNameTa).text || (businessName ?? "");
   const { count, hydrated, setOpen } = useCart();
   const pathname = usePathname();
   const router = useRouter();
@@ -152,7 +162,17 @@ export function Header({ businessName }: { businessName: string }) {
   }, [menuOpen]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const isScrolled = window.scrollY > 20;
+          setScrolled((prev) => (prev !== isScrolled ? isScrolled : prev));
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -202,7 +222,7 @@ export function Header({ businessName }: { businessName: string }) {
             href="/"
             onClick={handleLogoClick}
             className="flex shrink-0 items-center gap-3"
-            aria-label={businessName}
+            aria-label={activeName}
           >
             <Image
               src="/logo.png"
@@ -215,7 +235,7 @@ export function Header({ businessName }: { businessName: string }) {
               }`}
             />
             <span className="font-display text-lg sm:text-xl font-semibold text-[var(--color-ink)] tracking-tight">
-              {businessName}
+              {activeName}
             </span>
           </Link>
         </div>

@@ -7,14 +7,17 @@ import { motion, useReducedMotion, type Variants } from "framer-motion";
 import type { Category, Lang } from "@/lib/types";
 import { pick } from "@/lib/i18n/lang";
 import { imageUrl } from "@/lib/product-utils";
+import { useLang } from "./Providers";
 
 export function CategoryCardList({
   categories,
-  lang,
+  lang: initialLang = "en",
 }: {
   categories: Category[];
-  lang: Lang;
+  lang?: Lang;
 }) {
+  const { lang: currentLang } = useLang();
+  const lang = currentLang ?? initialLang;
   const prefersReduced = useReducedMotion();
 
   const containerVariants: Variants = {
@@ -57,8 +60,7 @@ export function CategoryCardList({
           <motion.div
             key={c.id}
             variants={itemVariants}
-            whileHover={prefersReduced ? undefined : { y: -4 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="transition-transform duration-300 hover:-translate-y-1"
           >
             <Link
               href={`/products?category=${c.slug}`}

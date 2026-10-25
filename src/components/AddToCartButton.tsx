@@ -1,7 +1,7 @@
 "use client";
 
 import { ShoppingBasket } from "lucide-react";
-import { useCart, useLang } from "./Providers";
+import { useCartActions, useLang } from "./Providers";
 import type { QuantityRule } from "@/lib/pricing";
 
 export function AddToCartButton(props: {
@@ -14,7 +14,7 @@ export function AddToCartButton(props: {
   label?: string;
   className?: string;
 }) {
-  const { add } = useCart();
+  const { add } = useCartActions();
   const { lang, t } = useLang();
   return (
     <button

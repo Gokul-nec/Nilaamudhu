@@ -8,16 +8,17 @@ const FLAG = "nm_splash";
 
 /** Branded intro shown once per browser session, never on later navigations. Capped at ~2s. */
 export function SplashScreen() {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(() => {
+    if (typeof window === "undefined") return true;
+    try {
+      return !sessionStorage.getItem(FLAG);
+    } catch {
+      return true;
+    }
+  });
 
   useEffect(() => {
-    let seen = false;
-    try { seen = Boolean(sessionStorage.getItem(FLAG)); } catch { /* ignore */ }
-    if (seen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setVisible(false);
-      return;
-    }
+    if (!visible) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const minimum = reduced ? 0 : 300;
     const started = performance.now();
@@ -42,7 +43,7 @@ export function SplashScreen() {
       window.removeEventListener("load", onLoaded);
       document.body.style.overflow = "";
     };
-  }, []);
+  }, [visible]);
 
   return (
     <AnimatePresence>

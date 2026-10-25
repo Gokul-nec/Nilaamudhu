@@ -9,6 +9,7 @@ import "@fontsource/hind-madurai/600.css";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Header } from "@/components/Header";
+import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { SplashScreen } from "@/components/SplashScreen";
@@ -50,8 +51,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <Providers initialLang={lang}>
           <SplashScreen />
-          {announcement && <div className="bg-[var(--color-forest-950)] px-4 py-2 text-center text-xs sm:text-sm font-medium tracking-wide text-white/90 border-b border-white/10">{announcement}</div>}
-          <Header businessName={name} />
+          <AnnouncementBar announcementEn={settings.announcement_en} announcementTa={settings.announcement_ta} />
+          <Header businessNameEn={settings.business_name_en} businessNameTa={settings.business_name_ta} businessName={name} />
           <main id="main">{children}</main>
           <Footer settings={settings} lang={lang} />
           <CartDrawer />

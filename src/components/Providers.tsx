@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { CartItem, Lang } from "@/lib/types";
 import { dictionaries, type Dict } from "@/lib/i18n/dictionary";
 import { LANG_COOKIE } from "@/lib/i18n/lang";
+import { setLanguageCookieAction } from "@/app/actions";
 import { clampQuantity, type QuantityRule } from "@/lib/pricing";
 
 /* ------------------------------------------------------------------ language */
@@ -20,24 +21,43 @@ export function useLang(): LangCtx {
 /* ---------------------------------------------------------------------- cart */
 const CART_KEY = "nm_cart_v1";
 
-interface CartCtx {
+interface CartStateCtx {
   items: CartItem[];
   count: number;
   hydrated: boolean;
   isOpen: boolean;
+  toast: string | null;
+}
+
+interface CartActionsCtx {
   setOpen: (open: boolean) => void;
   add: (item: CartItem, rule: QuantityRule) => void;
   setQuantity: (productId: string, variantId: string | null, quantity: number) => void;
   remove: (productId: string, variantId: string | null) => void;
   clear: () => void;
-  toast: string | null;
 }
-const CartContext = createContext<CartCtx | null>(null);
+
+export type CartCtx = CartStateCtx & CartActionsCtx;
+
+const CartStateContext = createContext<CartStateCtx | null>(null);
+const CartActionsContext = createContext<CartActionsCtx | null>(null);
+
+export function useCartState(): CartStateCtx {
+  const ctx = useContext(CartStateContext);
+  if (!ctx) throw new Error("useCartState must be used inside Providers");
+  return ctx;
+}
+
+export function useCartActions(): CartActionsCtx {
+  const ctx = useContext(CartActionsContext);
+  if (!ctx) throw new Error("useCartActions must be used inside Providers");
+  return ctx;
+}
 
 export function useCart(): CartCtx {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used inside Providers");
-  return ctx;
+  const state = useCartState();
+  const actions = useCartActions();
+  return { ...state, ...actions };
 }
 
 const same = (a: CartItem, productId: string, variantId: string | null) => a.productId === productId && a.variantId === variantId;
@@ -69,7 +89,10 @@ export function Providers({ initialLang, children }: { initialLang: Lang; childr
     document.cookie = `${LANG_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
     document.documentElement.lang = next;
     setLangState(next);
-    startTransition(() => router.refresh());
+    startTransition(async () => {
+      await setLanguageCookieAction(next);
+      router.refresh();
+    });
   }, [router]);
 
   const [items, setItems] = useState<CartItem[]>([]);
@@ -118,20 +141,27 @@ export function Providers({ initialLang, children }: { initialLang: Lang; childr
   const clear = useCallback(() => setItems([]), []);
 
   const langValue = useMemo(() => ({ lang, t, setLang, switching }), [lang, t, setLang, switching]);
-  const cartValue = useMemo<CartCtx>(() => ({
-    items, count: items.length, hydrated, isOpen, setOpen, add, setQuantity, remove, clear, toast,
-  }), [items, hydrated, isOpen, add, setQuantity, remove, clear, toast]);
+
+  const cartActionsValue = useMemo<CartActionsCtx>(() => ({
+    setOpen, add, setQuantity, remove, clear,
+  }), [setOpen, add, setQuantity, remove, clear]);
+
+  const cartStateValue = useMemo<CartStateCtx>(() => ({
+    items, count: items.length, hydrated, isOpen, toast,
+  }), [items, hydrated, isOpen, toast]);
 
   return (
     <LanguageContext.Provider value={langValue}>
-      <CartContext.Provider value={cartValue}>
-        {children}
-        <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-5 z-[60] flex justify-center px-4">
-          {toast && (
-            <div className="rise-in rounded-full bg-forest-900 px-5 py-2.5 text-sm font-semibold text-cream shadow-[var(--shadow-lift)]">{toast}</div>
-          )}
-        </div>
-      </CartContext.Provider>
+      <CartActionsContext.Provider value={cartActionsValue}>
+        <CartStateContext.Provider value={cartStateValue}>
+          {children}
+          <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-5 z-[60] flex justify-center px-4">
+            {toast && (
+              <div className="rise-in rounded-full bg-forest-900 px-5 py-2.5 text-sm font-semibold text-cream shadow-[var(--shadow-lift)]">{toast}</div>
+            )}
+          </div>
+        </CartStateContext.Provider>
+      </CartActionsContext.Provider>
     </LanguageContext.Provider>
   );
 }

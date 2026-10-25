@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Leaf, ShieldCheck } from "lucide-react";
 import { animate, motion, useInView, useReducedMotion, type Variants } from "framer-motion";
 import type { Lang } from "@/lib/types";
+import { useLang } from "./Providers";
 
 interface StatItem {
   num: string;
@@ -53,7 +54,7 @@ function StatNumber({ value }: { value: string }) {
 }
 
 export function HeroContent({
-  lang,
+  lang: initialLang,
   headline,
   heroLead,
   shopNowText,
@@ -61,7 +62,15 @@ export function HeroContent({
   stats,
   directFromFarmsText,
 }: HeroContentProps) {
+  const { lang: currentLang, t } = useLang();
+  const lang = currentLang ?? initialLang;
   const prefersReduced = useReducedMotion();
+
+  const activeStats = lang === "ta" ? [
+    { num: "100%", label: "பாரம்பரியம்" },
+    { num: "100%", label: "இயற்கையானது" },
+    { num: "0%", label: "இரசாயனமற்றது" },
+  ] : stats;
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -115,7 +124,7 @@ export function HeroContent({
         variants={itemVariants}
         className="mt-5 max-w-xl text-lg text-[var(--color-muted)] leading-relaxed"
       >
-        {heroLead}
+        {lang === "ta" ? t.home.heroLead : heroLead}
       </motion.p>
 
       {/* 4. Action Buttons */}
@@ -127,7 +136,7 @@ export function HeroContent({
           href="/products"
           className="btn btn-primary group !px-7 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
         >
-          <span>{shopNowText}</span>
+          <span>{lang === "ta" ? t.home.shopNow : shopNowText}</span>
           <ArrowRight
             className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
             aria-hidden="true"
@@ -137,7 +146,7 @@ export function HeroContent({
           href="#categories"
           className="btn btn-secondary !px-7 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
         >
-          {browseCategoriesText}
+          {lang === "ta" ? t.home.browseCategories : browseCategoriesText}
         </a>
       </motion.div>
 
@@ -146,7 +155,7 @@ export function HeroContent({
         variants={itemVariants}
         className="mt-10 flex flex-wrap items-center gap-6 border-t border-[var(--color-line)] pt-7"
       >
-        {stats.map((p) => (
+        {activeStats.map((p) => (
           <div
             key={p.label}
             className="promise-pill transition-transform duration-300 hover:-translate-y-0.5"
@@ -162,7 +171,7 @@ export function HeroContent({
         <div className="ml-auto hidden items-center gap-2 rounded-full bg-[var(--color-ivory)] px-4 py-2 sm:flex shadow-xs transition-transform duration-300 hover:scale-105">
           <ShieldCheck className="h-4 w-4 text-[var(--color-forest-700)]" aria-hidden="true" />
           <span className="text-sm font-semibold text-[var(--color-muted)]">
-            {directFromFarmsText}
+            {lang === "ta" ? "தரமான தானியங்கள்" : directFromFarmsText}
           </span>
         </div>
       </motion.div>

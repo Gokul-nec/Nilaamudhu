@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin";
 import { ProductForm } from "@/components/admin/ProductForm";
 import type { Product } from "@/lib/types";
-import { mapDocToProduct } from "@/lib/data";
+import { getLang, mapDocToProduct } from "@/lib/data";
+import { dictionaries } from "@/lib/i18n/dictionary";
 import type { ProductFormInput } from "@/lib/validation";
 
 export const metadata: Metadata = { title: "Edit product" };
@@ -14,7 +15,9 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   const { id } = await params;
   if (!id) notFound();
 
-  const { db } = await requireAdmin();
+  const [{ db }, lang] = await Promise.all([requireAdmin(), getLang()]);
+  const pf = dictionaries[lang].admin.productForm;
+
   const [productDoc, categoriesSnap] = await Promise.all([
     db.collection("products").doc(id).get(),
     db.collection("categories").get(),
@@ -27,6 +30,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     .map((d) => ({
       id: d.id,
       name_en: d.data().name_en || "",
+      name_ta: d.data().name_ta ? String(d.data().name_ta) : null,
       sort_order: Number(d.data().sort_order ?? 0),
     }))
     .sort((a, b) => a.sort_order - b.sort_order || a.name_en.localeCompare(b.name_en));
@@ -61,21 +65,23 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
         label_ta: str(v.label_ta),
         price: String(v.price),
         stock_status: v.stock_status,
+        sort_order: String(v.sort_order),
         is_active: v.is_active,
       })),
     images: [...(p.product_images ?? [])]
       .sort((a, b) => a.sort_order - b.sort_order)
       .map((i) => ({
-        id: i.id,
         path: i.path,
         alt_en: str(i.alt_en),
         alt_ta: str(i.alt_ta),
+        sort_order: String(i.sort_order),
       })),
   };
 
   return (
     <div className="space-y-6">
-      <h1 className="text-4xl font-semibold text-forest-900">Edit product</h1>
+      <h1 className="text-4xl font-semibold text-forest-900">{pf.editTitle}</h1>
+      <p className="text-muted">{pf.subtitle}</p>
       <ProductForm productId={p.id} initial={initial} categories={categories} />
     </div>
   );

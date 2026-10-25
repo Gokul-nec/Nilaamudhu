@@ -9,6 +9,7 @@ try {
 }
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   images: {
     remotePatterns: [
       ...(supabaseHost

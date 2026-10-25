@@ -1,12 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Mail, MapPin, Phone, MessageCircle } from "lucide-react";
 import type { Lang, SiteSettings } from "@/lib/types";
-import { dictionaries } from "@/lib/i18n/dictionary";
+import { useLang } from "./Providers";
 import { pick } from "@/lib/i18n/lang";
 
-export function Footer({ settings, lang }: { settings: SiteSettings; lang: Lang }) {
-  const t = dictionaries[lang];
+export function Footer({ settings, lang: fallbackLang }: { settings: SiteSettings; lang?: Lang }) {
+  const { lang: currentLang, t } = useLang();
+  const lang = currentLang ?? fallbackLang ?? "en";
   const name = pick(lang, settings.business_name_en, settings.business_name_ta).text;
   const address = pick(lang, settings.address_en, settings.address_ta).text;
   const tagline = pick(lang, settings.tagline_en, settings.tagline_ta).text;

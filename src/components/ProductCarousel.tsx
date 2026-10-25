@@ -12,15 +12,19 @@ import { activeVariants, effectiveStock, formatVariantPill, imageUrl, sortedImag
 import { formatMoney, toPaise, UNIT_LABELS } from "@/lib/pricing";
 import { StockBadge } from "./ui";
 import { AddToCartButton } from "./AddToCartButton";
+import { useLang } from "./Providers";
 
 interface ProductCarouselProps {
   products: Product[];
-  lang: Lang;
+  lang?: Lang;
   currency: string;
   intervalMs?: number;
 }
 
-export function ProductCarousel({ products, lang, currency, intervalMs = 5000 }: ProductCarouselProps) {
+export function ProductCarousel({ products, lang: initialLang = "en", currency, intervalMs = 5000 }: ProductCarouselProps) {
+  const { lang: currentLang, t: currentT } = useLang();
+  const lang = currentLang ?? initialLang;
+  const t = currentT ?? dictionaries[lang];
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<"next" | "prev">("next");
   const [selectedVariantIdMap, setSelectedVariantIdMap] = useState<Record<string, string>>({});
@@ -34,7 +38,6 @@ export function ProductCarousel({ products, lang, currency, intervalMs = 5000 }:
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const t = dictionaries[lang];
   const count = products.length;
 
   const nextSlide = useCallback(() => {
@@ -412,27 +415,6 @@ export function ProductCarousel({ products, lang, currency, intervalMs = 5000 }:
             animationPlayState: isPaused ? "paused" : "running",
           }}
         />
-      </div>
-
-      {/* Hidden eager preloader for remaining carousel product images */}
-      <div className="hidden" aria-hidden="true">
-        {products.map((p, i) => {
-          if (i === index) return null;
-          const pImg = sortedImages(p)[0];
-          const pSrc = imageUrl(pImg?.path);
-          if (!pSrc) return null;
-          return (
-            <Image
-              key={p.id}
-              src={pSrc}
-              alt=""
-              width={360}
-              height={360}
-              priority={i < 4}
-              loading="eager"
-            />
-          );
-        })}
       </div>
     </div>
   );

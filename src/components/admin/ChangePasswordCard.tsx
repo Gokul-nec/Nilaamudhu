@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { CheckCircle2, Eye, EyeOff, Lock } from "lucide-react";
 import { changeAdminPasswordAction } from "@/app/admin/actions";
+import { useLang } from "@/components/Providers";
 
 const passwordSchema = z
   .object({
@@ -20,6 +21,8 @@ const passwordSchema = z
 type PasswordValues = z.infer<typeof passwordSchema>;
 
 export function ChangePasswordCard() {
+  const { t } = useLang();
+  const st = t.admin.settings;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -44,7 +47,7 @@ export function ChangePasswordCard() {
       return;
     }
 
-    setSuccessMessage("Your admin password has been updated successfully.");
+    setSuccessMessage(st.passwordUpdated);
     reset();
   };
 
@@ -52,11 +55,9 @@ export function ChangePasswordCard() {
     <section className="card p-6 space-y-4">
       <div className="flex items-center gap-2">
         <Lock className="h-5 w-5 text-forest-800" />
-        <h2 className="text-2xl font-semibold text-forest-900">Change Admin Password</h2>
+        <h2 className="text-2xl font-semibold text-forest-900">{st.changePasswordTitle}</h2>
       </div>
-      <p className="text-sm text-muted">
-        Update the password for your administrator account. Password must be at least 6 characters long.
-      </p>
+      <p className="text-sm text-muted">{st.changePasswordHint}</p>
 
       {serverError && (
         <p role="alert" className="rounded-xl bg-[#f6dcd6] p-3 text-sm font-semibold text-danger">
@@ -77,7 +78,7 @@ export function ChangePasswordCard() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-md" noValidate>
         <div>
           <label htmlFor="new-password" className="mb-1 block font-semibold text-sm">
-            New Password
+            {st.newPassword}
           </label>
           <div className="relative">
             <input
@@ -102,7 +103,7 @@ export function ChangePasswordCard() {
 
         <div>
           <label htmlFor="confirm-password" className="mb-1 block font-semibold text-sm">
-            Confirm New Password
+            {st.confirmPassword}
           </label>
           <div className="relative">
             <input
@@ -128,7 +129,7 @@ export function ChangePasswordCard() {
         </div>
 
         <button type="submit" disabled={isSubmitting} className="btn btn-primary !min-h-10 text-sm">
-          {isSubmitting ? "Updating password..." : "Update Password"}
+          {isSubmitting ? "..." : st.updatePassword}
         </button>
       </form>
     </section>

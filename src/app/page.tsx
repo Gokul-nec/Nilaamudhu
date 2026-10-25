@@ -41,11 +41,12 @@ export default async function HomePage() {
         {/* Agriculture-themed background layer */}
         <HeroBackground />
 
-        {/* Paper texture overlay */}
+        {/* Paper texture overlay (lightweight single-octave grain with hardware containment) */}
         <div
-          className="pointer-events-none absolute inset-0 z-0 opacity-[0.03]"
+          className="pointer-events-none absolute inset-0 z-0 opacity-[0.025]"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E")`,
+            contain: "strict",
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E")`,
           }}
         />
 

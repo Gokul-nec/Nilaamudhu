@@ -8,6 +8,7 @@ import { z } from "zod";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { getClientAuth, isFirebaseConfigured } from "@/lib/firebase/client";
+import { useLang } from "@/components/Providers";
 
 const schema = z.object({
   email: z.string().trim().email("Enter a valid email"),
@@ -17,6 +18,8 @@ type Values = z.infer<typeof schema>;
 
 export function LoginForm() {
   const router = useRouter();
+  const { lang, t } = useLang();
+  const logT = t.admin.login;
   const [error, setError] = useState<string | null>(null);
   const [resetMessage, setResetMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -112,7 +115,7 @@ export function LoginForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4" noValidate>
       <div>
         <label htmlFor="email" className="mb-1 block font-semibold">
-          Email
+          {logT.email}
         </label>
         <input
           id="email"
@@ -127,7 +130,7 @@ export function LoginForm() {
 
       <div>
         <label htmlFor="password" className="mb-1 block font-semibold">
-          Password
+          {logT.password}
         </label>
         <div className="relative">
           <input
@@ -157,7 +160,9 @@ export function LoginForm() {
           disabled={isResetting}
           className="text-xs font-semibold text-forest-700 hover:text-forest-900 hover:underline"
         >
-          {isResetting ? "Sending reset email..." : "Forgot / Change password?"}
+          {isResetting
+            ? (lang === "ta" ? "மின்னஞ்சல் அனுப்புகிறது..." : "Sending reset email...")
+            : (lang === "ta" ? "கடவுச்சொல் மறந்துவிட்டதா?" : "Forgot / Change password?")}
         </button>
       </div>
 
@@ -171,7 +176,7 @@ export function LoginForm() {
       {error && <p role="alert" className="text-sm font-semibold text-danger">{error}</p>}
 
       <button type="submit" disabled={isSubmitting} className="btn btn-primary w-full">
-        {isSubmitting ? "Signing in…" : "Sign in"}
+        {isSubmitting ? logT.signingIn : logT.signIn}
       </button>
     </form>
   );

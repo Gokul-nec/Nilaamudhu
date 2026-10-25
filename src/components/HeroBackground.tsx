@@ -10,13 +10,15 @@
 export function HeroBackground() {
   return (
     <div
-      className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+      className="pointer-events-none absolute inset-0 z-0 overflow-hidden [contain:paint] [transform:translateZ(0)]"
       aria-hidden="true"
     >
       {/* 1. Golden-Hour Sun Glow behind the logo badge */}
       <div
         className="animate-pulse-soft pointer-events-none absolute -top-16 -right-16 md:right-10 lg:right-24 h-[420px] w-[420px] sm:h-[560px] sm:w-[560px] rounded-full blur-3xl opacity-25"
         style={{
+          transform: "translate3d(0,0,0)",
+          willChange: "transform, opacity",
           background:
             "radial-gradient(circle, var(--color-gold-500) 0%, var(--color-gold-300) 40%, transparent 70%)",
         }}

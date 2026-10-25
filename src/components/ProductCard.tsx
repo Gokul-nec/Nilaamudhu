@@ -11,10 +11,11 @@ import { activeVariants, effectiveStock, formatVariantPill, imageUrl, sortedImag
 import { formatMoney, toPaise, UNIT_LABELS } from "@/lib/pricing";
 import { PlaceholderImage, StockBadge } from "./ui";
 import { AddToCartButton } from "./AddToCartButton";
+import { useLang } from "./Providers";
 
 export function ProductCard({
   product,
-  lang,
+  lang: initialLang,
   currency,
   priority = false,
 }: {
@@ -23,7 +24,9 @@ export function ProductCard({
   currency: string;
   priority?: boolean;
 }) {
-  const t = dictionaries[lang];
+  const { lang: currentLang, t: currentT } = useLang();
+  const lang = currentLang ?? initialLang;
+  const t = currentT ?? dictionaries[lang];
   const name = pick(lang, product.name_en, product.name_ta);
   const blurb = pick(lang, product.short_description_en, product.short_description_ta);
 
@@ -61,8 +64,7 @@ export function ProductCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }}
-      whileHover={prefersReduced ? undefined : { y: -4 }}
-      className="group flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white shadow-[var(--shadow-card)] transition-shadow duration-300 hover:shadow-[var(--shadow-lift)]"
+      className="group flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-lift)]"
     >
       {/* Image */}
       <Link href={href} className="relative block aspect-[4/3] overflow-hidden bg-[var(--color-ivory)]" aria-label={name.text} tabIndex={-1}>

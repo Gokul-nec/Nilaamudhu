@@ -10,10 +10,13 @@ import { ArrowDown, ArrowUp, Loader2, Plus, Trash2, Upload } from "lucide-react"
 import { productFormSchema, type ProductFormInput, type ProductFormOutput } from "@/lib/validation";
 import { saveProductAction, uploadImageAction } from "@/app/admin/actions";
 import { imageUrl, slugify } from "@/lib/product-utils";
+import { useLang } from "@/components/Providers";
+import { pick } from "@/lib/i18n/lang";
 
 export interface CategoryOption {
   id: string;
   name_en: string;
+  name_ta?: string | null;
 }
 
 function Field({
@@ -51,6 +54,8 @@ export function ProductForm({
   categories: CategoryOption[];
 }) {
   const router = useRouter();
+  const { lang, t } = useLang();
+  const pf = t.admin.productForm;
   const [serverError, setServerError] = useState<string | null>(null);
   const [newImageUrl, setNewImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -451,27 +456,27 @@ export function ProductForm({
                   value={field.value ?? ""}
                   onChange={(e) => field.onChange(e.target.value || null)}
                 >
-                  <option value="">No category</option>
+                  <option value="">{lang === "ta" ? "வகை இல்லை" : "No category"}</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.name_en}
+                      {pick(lang, c.name_en, c.name_ta).text}
                     </option>
                   ))}
                 </select>
               )}
             />
           </Field>
-          <Field label="Visibility" htmlFor="status" hint="Only Active products show on the website.">
+          <Field label={lang === "ta" ? "நிலை" : "Visibility"} htmlFor="status" hint={lang === "ta" ? "செயலில் உள்ள பொருட்கள் மட்டுமே தளத்தில் தோன்றும்." : "Only Active products show on the website."}>
             <select id="status" className="field" {...register("status")}>
-              <option value="draft">Inactive (hidden)</option>
-              <option value="active">Active (visible)</option>
-              <option value="archived">Archived</option>
+              <option value="draft">{lang === "ta" ? "செயலற்றது (மறைக்கப்பட்டது)" : "Inactive (hidden)"}</option>
+              <option value="active">{lang === "ta" ? "செயலில் (தெரியும்)" : "Active (visible)"}</option>
+              <option value="archived">{lang === "ta" ? "காப்பகப்படுத்தப்பட்டது" : "Archived"}</option>
             </select>
           </Field>
           <Field
-            label="Display order"
+            label={lang === "ta" ? "காட்சி வரிசை" : "Display order"}
             htmlFor="sort_order"
-            hint="Lower numbers appear first."
+            hint={lang === "ta" ? "குறைந்த எண்கள் முதலில் தோன்றும்." : "Lower numbers appear first."}
             error={errors.sort_order}
           >
             <input id="sort_order" inputMode="numeric" className="field" {...register("sort_order")} />
@@ -479,20 +484,20 @@ export function ProductForm({
         </div>
         <label className="flex items-center gap-3">
           <input type="checkbox" className="h-5 w-5" {...register("is_featured")} />
-          Show on the homepage as a featured product
+          {lang === "ta" ? "முகப்பில் சிறப்புப் பொருளாகக் காட்டு" : "Show on the homepage as a featured product"}
         </label>
       </section>
 
       <div className="flex flex-wrap items-center gap-3">
         <button type="submit" disabled={isSubmitting} className="btn btn-primary">
-          {isSubmitting ? "Saving…" : "Save product"}
+          {isSubmitting ? pf.saving : pf.save}
         </button>
         <Link href="/admin/products" className="btn btn-outline">
-          Cancel
+          {lang === "ta" ? "ரத்து செய்" : "Cancel"}
         </Link>
         {Object.keys(errors).length > 0 && (
           <p role="alert" className="text-sm font-semibold text-danger">
-            Please fix the highlighted fields.
+            {lang === "ta" ? "குறிக்கப்பட்ட பிழைகளைச் சரிசெய்யவும்." : "Please fix the highlighted fields."}
           </p>
         )}
       </div>

@@ -9,6 +9,7 @@ import { Loader2, Upload } from "lucide-react";
 import { categoryFormSchema, type CategoryFormInput, type CategoryFormOutput } from "@/lib/validation";
 import { deleteCategoryAction, saveCategoryAction, uploadImageAction } from "@/app/admin/actions";
 import { imageUrl, slugify } from "@/lib/product-utils";
+import { useLang } from "@/components/Providers";
 
 export interface CategoryRow {
   id: string;
@@ -31,6 +32,8 @@ const blank: CategoryFormInput = {
 
 function CategoryEditor({ row, onDone }: { row: CategoryRow | null; onDone: () => void }) {
   const router = useRouter();
+  const { t } = useLang();
+  const catT = t.admin.categories;
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -102,7 +105,7 @@ function CategoryEditor({ row, onDone }: { row: CategoryRow | null; onDone: () =
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-3 md:grid-cols-2">
       <div>
         <label htmlFor={`c-en-${id}`} className="mb-1 block font-semibold">
-          Name (English) *
+          {catT.nameEn}
         </label>
         <input
           id={`c-en-${id}`}
@@ -118,13 +121,13 @@ function CategoryEditor({ row, onDone }: { row: CategoryRow | null; onDone: () =
       </div>
       <div>
         <label htmlFor={`c-ta-${id}`} className="mb-1 block font-semibold">
-          Name (Tamil)
+          {catT.nameTa}
         </label>
         <input id={`c-ta-${id}`} lang="ta" className="field" {...register("name_ta")} />
       </div>
       <div>
         <label htmlFor={`c-slug-${id}`} className="mb-1 block font-semibold">
-          Slug *
+          {catT.slug}
         </label>
         <input
           id={`c-slug-${id}`}
@@ -140,14 +143,14 @@ function CategoryEditor({ row, onDone }: { row: CategoryRow | null; onDone: () =
       </div>
       <div>
         <label htmlFor={`c-ord-${id}`} className="mb-1 block font-semibold">
-          Display order
+          {catT.order}
         </label>
         <input id={`c-ord-${id}`} inputMode="numeric" className="field" {...register("sort_order")} />
         {errors.sort_order && <p role="alert" className="mt-1 text-sm text-danger">{errors.sort_order.message}</p>}
       </div>
       <div className="md:col-span-2">
         <label htmlFor={`c-img-${id}`} className="mb-1 block font-semibold">
-          Category Image
+          {catT.image}
         </label>
         {uploadError && (
           <p role="alert" className="mb-2 text-sm font-semibold text-danger">
@@ -166,12 +169,12 @@ function CategoryEditor({ row, onDone }: { row: CategoryRow | null; onDone: () =
             {uploading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Uploading...</span>
+                <span>{catT.uploading}</span>
               </>
             ) : (
               <>
                 <Upload className="h-4 w-4" />
-                <span>Upload</span>
+                <span>{catT.upload}</span>
               </>
             )}
             <input
@@ -185,7 +188,7 @@ function CategoryEditor({ row, onDone }: { row: CategoryRow | null; onDone: () =
           </label>
           <input
             id={`c-img-${id}`}
-            placeholder="or paste image URL / path"
+            placeholder={catT.imagePlaceholder}
             className="field flex-1 !min-h-9 text-sm min-w-[200px]"
             {...register("image_path")}
           />
@@ -195,23 +198,23 @@ function CategoryEditor({ row, onDone }: { row: CategoryRow | null; onDone: () =
               className="text-sm font-semibold text-danger"
               onClick={() => setValue("image_path", null, { shouldDirty: true })}
             >
-              Clear
+              {catT.clear}
             </button>
           )}
         </div>
       </div>
       <label className="flex items-center gap-3">
         <input type="checkbox" className="h-5 w-5" {...register("is_active")} />
-        Active (visible on the website)
+        {catT.activeCheckbox}
       </label>
       {error && <p role="alert" className="text-sm font-semibold text-danger md:col-span-2">{error}</p>}
       <div className="flex gap-2 md:col-span-2">
         <button type="submit" disabled={isSubmitting} className="btn btn-primary !min-h-10">
-          {row ? "Save category" : "Add category"}
+          {row ? catT.saveCategory : catT.addCategory}
         </button>
         {row && (
           <button type="button" className="btn btn-outline !min-h-10" onClick={onDone}>
-            Cancel
+            {catT.cancel}
           </button>
         )}
       </div>
@@ -221,11 +224,13 @@ function CategoryEditor({ row, onDone }: { row: CategoryRow | null; onDone: () =
 
 export function CategoryManager({ categories }: { categories: CategoryRow[] }) {
   const router = useRouter();
+  const { t } = useLang();
+  const catT = t.admin.categories;
   const [editing, setEditing] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function remove(c: CategoryRow) {
-    if (!window.confirm(`Delete "${c.name_en}"? Its products are kept and become uncategorised.`)) return;
+    if (!window.confirm(catT.confirmDelete)) return;
     const res = await deleteCategoryAction(c.id);
     if (!res.ok) setError(res.error);
     else {
@@ -237,12 +242,12 @@ export function CategoryManager({ categories }: { categories: CategoryRow[] }) {
   return (
     <div className="space-y-8">
       <section className="card p-6">
-        <h2 className="mb-4 text-2xl font-semibold text-forest-900">Add category</h2>
+        <h2 className="mb-4 text-2xl font-semibold text-forest-900">{catT.addCategory}</h2>
         <CategoryEditor row={null} onDone={() => undefined} />
       </section>
       {error && <p role="alert" className="font-semibold text-danger">{error}</p>}
       {categories.length === 0 ? (
-        <p className="card p-8 text-center text-muted">No categories yet.</p>
+        <p className="card p-8 text-center text-muted">{catT.noCategories}</p>
       ) : (
         <ul className="space-y-3">
           {categories.map((c) => (
@@ -257,19 +262,19 @@ export function CategoryManager({ categories }: { categories: CategoryRow[] }) {
                       {c.name_ta && <span lang="ta" className="ml-2 font-normal text-muted">{c.name_ta}</span>}
                     </p>
                     <p className="text-sm text-muted">
-                      /{c.slug} · order {c.sort_order} · {c.is_active ? "active" : "inactive"}
+                      /{c.slug} · {catT.orderLabel} {c.sort_order} · {c.is_active ? catT.activeLabel : catT.inactiveLabel}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     <button type="button" className="btn btn-outline !min-h-9 text-sm" onClick={() => setEditing(c.id)}>
-                      Edit
+                      {catT.edit}
                     </button>
                     <button
                       type="button"
                       className="btn btn-outline !min-h-9 text-sm !text-danger"
                       onClick={() => remove(c)}
                     >
-                      Delete
+                      {catT.delete}
                     </button>
                   </div>
                 </div>

@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/admin";
+import { getLang } from "@/lib/data";
+import { dictionaries } from "@/lib/i18n/dictionary";
 import { CategoryManager, type CategoryRow } from "@/components/admin/CategoryManager";
 
 export const metadata: Metadata = { title: "Categories" };
 
 export default async function AdminCategories() {
-  const { db } = await requireAdmin();
+  const [{ db }, lang] = await Promise.all([requireAdmin(), getLang()]);
+  const t = dictionaries[lang].admin.categories;
+
   const snap = await db.collection("categories").get();
   const categories: CategoryRow[] = snap.docs
     .map((d) => {
@@ -24,7 +28,7 @@ export default async function AdminCategories() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-4xl font-semibold text-forest-900">Categories</h1>
+      <h1 className="text-4xl font-semibold text-forest-900">{t.title}</h1>
       <CategoryManager categories={categories} />
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Minus, Plus, ShoppingBasket } from "lucide-react";
-import { useCart, useLang } from "./Providers";
+import { useCartActions, useLang } from "./Providers";
 import { clampQuantity, formatMoney, formatQuantity, lineTotalPaise, toMilli, toPaise, UNIT_LABELS } from "@/lib/pricing";
 import { pick } from "@/lib/i18n/lang";
 import type { PricingUnit, StockStatus } from "@/lib/types";
@@ -30,7 +30,7 @@ export interface PanelProps {
 
 export function PurchasePanel(p: PanelProps) {
   const { lang, t } = useLang();
-  const { add, setOpen } = useCart();
+  const { add, setOpen } = useCartActions();
   const hasVariants = p.variants.length > 0;
   const firstAvailable = p.variants.find((v) => v.stock !== "out_of_stock") ?? p.variants[0];
   const [variantId, setVariantId] = useState<string | null>(firstAvailable?.id ?? null);

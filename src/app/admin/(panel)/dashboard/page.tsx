@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { requireAdmin } from "@/lib/admin";
-import { mapDocToProduct } from "@/lib/data";
+import { getLang, mapDocToProduct } from "@/lib/data";
+import { dictionaries } from "@/lib/i18n/dictionary";
+import { pick } from "@/lib/i18n/lang";
 
 export default async function DashboardPage() {
-  const { db } = await requireAdmin();
+  const [{ db }, lang] = await Promise.all([requireAdmin(), getLang()]);
+  const t = dictionaries[lang].admin;
 
   const [productsSnap, categoriesSnap, settingsDoc] = await Promise.all([
     db.collection("products").get(),
@@ -27,25 +30,25 @@ export default async function DashboardPage() {
   const whatsappNumber = settingsData?.whatsapp_number;
 
   const stats = [
-    { label: "Total products", value: total },
-    { label: "Active", value: active },
-    { label: "Inactive (draft)", value: inactive },
-    { label: "Out of stock", value: outOfStock },
-    { label: "Categories", value: categories },
+    { label: t.dashboard.stats.total, value: total },
+    { label: t.dashboard.stats.active, value: active },
+    { label: t.dashboard.stats.draft, value: inactive },
+    { label: t.dashboard.stats.outOfStock, value: outOfStock },
+    { label: t.dashboard.stats.categories, value: categories },
   ];
 
   return (
     <div className="space-y-8">
-      <h1 className="text-4xl font-semibold text-forest-900">Dashboard</h1>
+      <h1 className="text-4xl font-semibold text-forest-900">{t.dashboard.title}</h1>
       {!whatsappNumber && (
         <div role="alert" className="flex items-start gap-3 rounded-2xl border border-gold-500 bg-[#fbeccb] p-4">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-gold-700" aria-hidden />
           <p>
-            <strong>WhatsApp number is not set.</strong> Customers cannot send orders until you add it in{" "}
+            {t.dashboard.whatsappMissing}{" "}
             <Link href="/admin/settings" className="font-semibold underline">
-              Settings
+              {t.dashboard.settingsLink}
             </Link>
-            .
+            {t.dashboard.whatsappMissingSuffix}
           </p>
         </div>
       )}
@@ -59,26 +62,30 @@ export default async function DashboardPage() {
       </dl>
       <section>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-2xl font-semibold text-forest-900">Recently updated</h2>
+          <h2 className="text-2xl font-semibold text-forest-900">{t.dashboard.recent}</h2>
           <Link href="/admin/products/new" className="btn btn-primary">
-            Add product
+            {t.dashboard.addProduct}
           </Link>
         </div>
         {recent.length > 0 ? (
           <ul className="card divide-y divide-line">
-            {recent.map((p) => (
-              <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                <Link href={`/admin/products/${p.id}/edit`} className="font-semibold hover:underline">
-                  {p.name_en}
-                </Link>
-                <span className="text-sm text-muted">
-                  {p.status} · {new Date(p.updated_at).toLocaleDateString("en-IN")}
-                </span>
-              </li>
-            ))}
+            {recent.map((p) => {
+              const name = pick(lang, p.name_en, p.name_ta).text;
+              const statusText = t.products.status[p.status] ?? p.status;
+              return (
+                <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <Link href={`/admin/products/${p.id}/edit`} className="font-semibold hover:underline">
+                    {name}
+                  </Link>
+                  <span className="text-sm text-muted">
+                    {statusText} · {new Date(p.updated_at).toLocaleDateString(lang === "ta" ? "ta-IN" : "en-IN")}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         ) : (
-          <p className="card p-6 text-muted">No products yet. Add your first product to get started.</p>
+          <p className="card p-6 text-muted">{t.dashboard.noProducts}</p>
         )}
       </section>
     </div>
