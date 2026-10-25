@@ -157,11 +157,11 @@ export function PurchasePanel(p: PanelProps) {
         )}
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-3">
         <button
           type="button"
           disabled={soldOut}
-          className="btn btn-primary flex-1 shadow-[var(--shadow-green)]"
+          className="btn btn-primary flex-1 shadow-[var(--shadow-green)] !min-h-11"
           onClick={() =>
             add(
               { productId: p.productId, variantId: hasVariants ? variantId : null, quantity: qty },
@@ -169,11 +169,11 @@ export function PurchasePanel(p: PanelProps) {
             )
           }
         >
-          <ShoppingBasket className="h-5 w-5" aria-hidden />
-          {soldOut ? t.common.outOfStock : t.common.addToCart}
+          <ShoppingBasket className="h-5 w-5 shrink-0" aria-hidden />
+          <span className="truncate min-w-0">{soldOut ? t.common.outOfStock : t.common.addToCart}</span>
         </button>
-        <button type="button" className="btn btn-outline" onClick={() => setOpen(true)}>
-          {t.cart.open}
+        <button type="button" className="btn btn-outline !min-h-11" onClick={() => setOpen(true)}>
+          <span className="truncate">{t.cart.open}</span>
         </button>
       </div>
     </div>

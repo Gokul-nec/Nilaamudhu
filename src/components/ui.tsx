@@ -10,7 +10,7 @@ export function StockBadge({ status, lang }: { status: StockStatus; lang: Lang }
     limited: { label: t.limited, cls: "bg-[#fef3da] text-[var(--color-gold-700)]" },
     out_of_stock: { label: t.outOfStock, cls: "bg-[#fde8e4] text-[var(--color-danger)]" },
   }[status];
-  return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${map.cls}`}>{map.label}</span>;
+  return <span className={`inline-flex items-center rounded-full px-2 sm:px-2.5 py-0.5 text-[11px] sm:text-xs font-semibold ${map.cls}`}>{map.label}</span>;
 }
 
 export function PlaceholderImage({ label, className = "" }: { label: string; className?: string }) {

@@ -82,7 +82,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: SP 
           {filtered && <Link href="/products" className="btn btn-outline mt-5">{t.shop.clearFilters}</Link>}
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
           {products.map((p, i) => (
             <ProductCard key={p.id} product={p} lang={lang} currency={settings.currency_symbol} priority={i < 4} />
           ))}

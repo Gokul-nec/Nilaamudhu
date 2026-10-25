@@ -20,7 +20,7 @@ function LanguageToggle() {
     <div
       role="group"
       aria-label="Language"
-      className={`relative inline-flex rounded-full border border-[var(--color-line)] bg-white p-0.5 shadow-xs ${switching ? "opacity-70" : ""}`}
+      className={`relative inline-flex shrink-0 rounded-full border border-[var(--color-line)] bg-white p-0.5 shadow-xs ${switching ? "opacity-70" : ""}`}
     >
       {options.map((o) => {
         const isActive = lang === o.value;
@@ -32,7 +32,7 @@ function LanguageToggle() {
             aria-label={o.aria}
             aria-pressed={isActive}
             onClick={() => !isActive && setLang(o.value)}
-            className="relative min-h-9 min-w-11 rounded-full px-3 text-sm font-semibold transition-colors duration-200 z-10"
+            className="relative min-h-8 sm:min-h-9 min-w-8 sm:min-w-11 rounded-full px-2 sm:px-3 text-xs sm:text-sm font-semibold transition-colors duration-200 z-10"
           >
             {isActive && (
               <motion.span
@@ -108,6 +108,7 @@ export function Header({
   const activeName = pick(lang, businessNameEn ?? businessName, businessNameTa).text || (businessName ?? "");
   const { count, hydrated, setOpen } = useCart();
   const pathname = usePathname();
+  const isAdmin = pathname.startsWith("/admin");
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -200,12 +201,12 @@ export function Header({
 
       {/* Main navigation row */}
       <div
-        className={`container-page flex items-center justify-between gap-3 sm:gap-4 transition-all duration-300 ${
-          scrolled ? "py-1.5 sm:py-2" : "py-2.5 sm:py-3"
+        className={`container-page flex items-center justify-between gap-2 sm:gap-4 transition-all duration-300 ${
+          scrolled ? "py-1.5 sm:py-2" : "py-2 sm:py-3"
         }`}
       >
         {/* Left: Mobile menu trigger + Brand logo & title */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 md:flex-initial">
           <button
             ref={menuButton}
             type="button"
@@ -213,7 +214,7 @@ export function Header({
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
             aria-label={menuOpen ? t.nav.close : t.nav.menu}
-            className="grid h-10 w-10 place-items-center rounded-full border border-[var(--color-line)] hover:bg-[var(--color-ivory)] md:hidden"
+            className="grid h-9 w-9 sm:h-10 sm:w-10 shrink-0 place-items-center rounded-full border border-[var(--color-line)] hover:bg-[var(--color-ivory)] md:hidden"
           >
             {menuOpen ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
           </button>
@@ -221,7 +222,7 @@ export function Header({
           <Link
             href="/"
             onClick={handleLogoClick}
-            className="flex shrink-0 items-center gap-3"
+            className="flex items-center gap-2 sm:gap-3 min-w-0 md:shrink-0"
             aria-label={activeName}
           >
             <Image
@@ -230,11 +231,11 @@ export function Header({
               width={582}
               height={570}
               priority
-              className={`w-auto transition-all duration-300 hover:scale-105 ${
-                scrolled ? "h-9 sm:h-12" : "h-11 sm:h-14"
+              className={`w-auto shrink-0 transition-all duration-300 hover:scale-105 ${
+                scrolled ? "h-8 sm:h-12" : "h-9 sm:h-14"
               }`}
             />
-            <span className="font-display text-lg sm:text-xl font-semibold text-[var(--color-ink)] tracking-tight">
+            <span className="font-display text-sm sm:text-lg lg:text-xl font-semibold text-[var(--color-ink)] tracking-tight truncate min-w-0">
               {activeName}
             </span>
           </Link>
@@ -259,7 +260,7 @@ export function Header({
         </nav>
 
         {/* Right: Search, Language toggle, Cart, WhatsApp */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <SearchForm className="hidden w-52 lg:block xl:w-72" />
           <LanguageToggle />
 
@@ -267,16 +268,16 @@ export function Header({
             type="button"
             onClick={() => setOpen(true)}
             aria-label={`${t.cart.open}${hydrated ? ` (${count})` : ""}`}
-            className="relative grid h-11 w-11 place-items-center rounded-full bg-[var(--color-forest-900)] text-white transition-colors hover:bg-[var(--color-forest-800)] shadow-[var(--shadow-green)]"
+            className="relative grid h-9.5 w-9.5 sm:h-11 sm:w-11 place-items-center rounded-full bg-[var(--color-forest-900)] text-white transition-colors hover:bg-[var(--color-forest-800)] shadow-[var(--shadow-green)] shrink-0"
           >
-            <ShoppingBasket className="h-5 w-5" aria-hidden />
+            <ShoppingBasket className="h-4.5 w-4.5 sm:h-5 sm:w-5" aria-hidden />
             {hydrated && count > 0 && (
               <motion.span
                 key={count}
                 initial={{ scale: 0.4, opacity: 0 }}
                 animate={{ scale: [1.35, 0.9, 1], opacity: 1 }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
-                className="absolute -top-1 -right-1 grid h-5 min-w-5 place-items-center rounded-full bg-[var(--color-gold-500)] px-1 text-xs font-bold text-[var(--color-forest-950)] shadow-xs"
+                className="absolute -top-1 -right-1 grid h-4.5 min-w-4.5 sm:h-5 sm:min-w-5 place-items-center rounded-full bg-[var(--color-gold-500)] px-1 text-[10px] sm:text-xs font-bold text-[var(--color-forest-950)] shadow-xs"
               >
                 {count}
               </motion.span>
@@ -285,12 +286,14 @@ export function Header({
         </div>
       </div>
 
-      {/* Secondary slim sub-bar on mobile/desktop for search & WhatsApp */}
-      <div className="border-t border-[var(--color-line)] bg-[var(--color-ivory)]/40 md:hidden">
-        <div className="container-page py-2">
-          <SearchForm className="w-full" />
+      {/* Secondary slim sub-bar on mobile for search (hidden in admin views) */}
+      {!isAdmin && (
+        <div className="border-t border-[var(--color-line)] bg-[var(--color-ivory)]/40 md:hidden">
+          <div className="container-page py-2">
+            <SearchForm className="w-full" />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Mobile drawer */}
       {menuOpen && (

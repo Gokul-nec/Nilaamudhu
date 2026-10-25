@@ -127,7 +127,7 @@ export function ProductCarousel({ products, lang: initialLang = "en", currency, 
   return (
     <div
       ref={containerRef}
-      className="group/carousel relative mb-14 overflow-hidden rounded-[2.25rem] border border-[var(--color-line)] bg-gradient-to-br from-white via-[var(--color-cream)] to-[var(--color-ivory)] p-6 sm:p-10 shadow-[var(--shadow-card)] transition-shadow duration-300 hover:shadow-[var(--shadow-lift)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-forest-800)]"
+      className="group/carousel relative mb-14 overflow-hidden rounded-2xl sm:rounded-[2.25rem] border border-[var(--color-line)] bg-gradient-to-br from-white via-[var(--color-cream)] to-[var(--color-ivory)] p-4 sm:p-10 shadow-[var(--shadow-card)] transition-shadow duration-300 hover:shadow-[var(--shadow-lift)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-forest-800)]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onFocus={() => setIsFocused(true)}
@@ -155,7 +155,7 @@ export function ProductCarousel({ products, lang: initialLang = "en", currency, 
       />
 
       {/* Main Showcase Grid */}
-      <div className="relative grid items-center gap-8 md:grid-cols-[1.15fr_0.85fr] lg:gap-12 min-h-[360px] sm:min-h-[380px]">
+      <div className="relative grid items-center gap-6 sm:gap-8 md:grid-cols-[1.15fr_0.85fr] lg:gap-12 min-h-[340px] sm:min-h-[380px]">
         {/* Left Column: Product Information & CTAs */}
         <div
           key={`content-${current.id}`}
@@ -266,16 +266,16 @@ export function ProductCarousel({ products, lang: initialLang = "en", currency, 
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
             <Link
               href={href}
-              className="btn btn-primary !px-6 shadow-[var(--shadow-green)] transition-transform hover:scale-105 active:scale-95"
+              className="btn btn-primary !px-6 shadow-[var(--shadow-green)] transition-transform hover:scale-105 active:scale-95 justify-center"
             >
               <span>{t.common.viewDetails}</span>
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
 
-            <div className="w-fit">
+            <div className="w-full sm:w-fit">
               <AddToCartButton
                 productId={current.id}
                 variantId={selectedVariant?.id ?? null}
@@ -292,10 +292,10 @@ export function ProductCarousel({ products, lang: initialLang = "en", currency, 
         </div>
 
         {/* Right Column: Premium Handcrafted Ceramic Plate Image Showcase */}
-        <div className="flex items-center justify-center py-4">
+        <div className="flex items-center justify-center py-2 sm:py-4">
           <div
             key={`image-${current.id}`}
-            className={`relative flex aspect-square w-full max-w-[270px] sm:max-w-[320px] lg:max-w-[360px] items-center justify-center ${
+            className={`relative flex aspect-square w-full max-w-[220px] sm:max-w-[320px] lg:max-w-[360px] items-center justify-center ${
               reducedMotion ? "" : "animate-carousel-plate"
             }`}
           >

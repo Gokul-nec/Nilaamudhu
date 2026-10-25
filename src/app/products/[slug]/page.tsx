@@ -111,22 +111,22 @@ export default async function ProductPage({ params }: { params: Params }) {
           </div>
 
           {/* Trust Badges */}
-          <div className="mt-6 grid grid-cols-2 gap-3 rounded-2xl border border-[var(--color-line)] bg-[var(--color-ivory)]/70 p-4 text-xs font-semibold text-[var(--color-forest-900)]">
-            <div className="flex items-center gap-2">
+          <div className="mt-6 grid grid-cols-2 gap-2 sm:gap-3 rounded-2xl border border-[var(--color-line)] bg-[var(--color-ivory)]/70 p-3 sm:p-4 text-[11px] sm:text-xs font-semibold text-[var(--color-forest-900)]">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
               <Leaf className="h-4 w-4 text-[var(--color-forest-700)] shrink-0" />
-              <span>{lang === "ta" ? "பாரம்பரிய நாட்டு ரகங்கள்" : "100% Traditional Heritage"}</span>
+              <span className="truncate">{lang === "ta" ? "பாரம்பரிய நாட்டு ரகங்கள்" : "100% Traditional Heritage"}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
               <ShieldCheck className="h-4 w-4 text-[var(--color-forest-700)] shrink-0" />
-              <span>{lang === "ta" ? "இயற்கை முறையில் விளைவித்தது" : "Naturally Cultivated"}</span>
+              <span className="truncate">{lang === "ta" ? "இயற்கை முறையில் விளைவித்தது" : "Naturally Cultivated"}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
               <Truck className="h-4 w-4 text-[var(--color-forest-700)] shrink-0" />
-              <span>{lang === "ta" ? "நேரடி வீட்டு டெலிவரி" : "Safe Doorstep Delivery"}</span>
+              <span className="truncate">{lang === "ta" ? "நேரடி வீட்டு டெலிவரி" : "Safe Doorstep Delivery"}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
               <HeartHandshake className="h-4 w-4 text-[var(--color-forest-700)] shrink-0" />
-              <span>{lang === "ta" ? "சுலபமான வாட்ஸ்அப் ஆர்டர்" : "Easy WhatsApp Order"}</span>
+              <span className="truncate">{lang === "ta" ? "சுலபமான வாட்ஸ்அப் ஆர்டர்" : "Easy WhatsApp Order"}</span>
             </div>
           </div>
         </div>

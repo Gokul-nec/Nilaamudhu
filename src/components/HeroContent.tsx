@@ -130,11 +130,11 @@ export function HeroContent({
       {/* 4. Action Buttons */}
       <motion.div
         variants={itemVariants}
-        className="mt-8 flex flex-wrap items-center gap-3"
+        className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
       >
         <Link
           href="/products"
-          className="btn btn-primary group !px-7 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+          className="btn btn-primary group !px-7 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg justify-center"
         >
           <span>{lang === "ta" ? t.home.shopNow : shopNowText}</span>
           <ArrowRight
@@ -144,7 +144,7 @@ export function HeroContent({
         </Link>
         <a
           href="#categories"
-          className="btn btn-secondary !px-7 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+          className="btn btn-secondary !px-7 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md justify-center"
         >
           {lang === "ta" ? t.home.browseCategories : browseCategoriesText}
         </a>
@@ -153,17 +153,17 @@ export function HeroContent({
       {/* 5. Trust / Stats Row */}
       <motion.div
         variants={itemVariants}
-        className="mt-10 flex flex-wrap items-center gap-6 border-t border-[var(--color-line)] pt-7"
+        className="mt-8 sm:mt-10 flex flex-wrap items-center justify-around sm:justify-start gap-4 sm:gap-6 border-t border-[var(--color-line)] pt-5 sm:pt-7"
       >
         {activeStats.map((p) => (
           <div
             key={p.label}
             className="promise-pill transition-transform duration-300 hover:-translate-y-0.5"
           >
-            <strong className="text-xl font-bold text-[var(--color-forest-900)] tabular-nums">
+            <strong className="text-lg sm:text-xl font-bold text-[var(--color-forest-900)] tabular-nums">
               <StatNumber value={p.num} />
             </strong>
-            <span className="text-[0.68rem] uppercase tracking-widest text-[var(--color-muted)]">
+            <span className="text-[0.65rem] sm:text-[0.68rem] uppercase tracking-wider sm:tracking-widest text-[var(--color-muted)] text-center">
               {p.label}
             </span>
           </div>

@@ -86,43 +86,45 @@ export function ProductCard({
       </Link>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col gap-2 p-4 pt-3">
-        <h3 className="text-base leading-snug font-semibold text-[var(--color-ink)]">
+      <div className="flex flex-1 flex-col gap-1.5 sm:gap-2 p-2.5 sm:p-4 pt-2 sm:pt-3">
+        <h3 className="text-sm sm:text-base leading-snug font-semibold text-[var(--color-ink)] line-clamp-2">
           <Link href={href} className="hover:text-[var(--color-forest-800)] hover:underline underline-offset-4 transition-colors">{name.text}</Link>
         </h3>
         {name.pending && <p className="text-xs text-[var(--color-gold-700)]">{t.common.tamilPending}</p>}
-        {blurb.text && <p className="line-clamp-2 text-sm text-[var(--color-muted)] leading-relaxed">{blurb.text}</p>}
+        {blurb.text && <p className="line-clamp-2 text-xs sm:text-sm text-[var(--color-muted)] leading-relaxed">{blurb.text}</p>}
 
         {/* Price + Strikethrough MRP (No "From" label) */}
         <div className="mt-auto pt-2">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <div className="flex items-baseline gap-2">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
+            <div className="flex flex-wrap items-baseline gap-1 sm:gap-2">
               {pricePaise !== null ? (
                 <>
-                  <span className="text-xl sm:text-2xl font-bold text-[var(--color-forest-900)] tracking-tight">
+                  <span className="text-lg sm:text-2xl font-bold text-[var(--color-forest-900)] tracking-tight">
                     {formatMoney(pricePaise, currency)}
                   </span>
                   {mrpPaise !== null && mrpPaise > pricePaise && (
-                    <span className="text-sm font-normal text-neutral-400 line-through">
+                    <span className="text-xs sm:text-sm font-normal text-neutral-400 line-through">
                       {formatMoney(mrpPaise, currency)}
                     </span>
                   )}
                   {!hasVariants && (
-                    <span className="text-xs text-[var(--color-muted)] font-normal">
+                    <span className="text-[11px] sm:text-xs text-[var(--color-muted)] font-normal">
                       {" "}/ {UNIT_LABELS[product.pricing_unit][lang]}
                     </span>
                   )}
                 </>
               ) : (
-                <span className="text-base text-[var(--color-muted)]">{t.product.priceOnRequest}</span>
+                <span className="text-sm sm:text-base text-[var(--color-muted)]">{t.product.priceOnRequest}</span>
               )}
             </div>
-            <StockBadge status={stock} lang={lang} />
+            <div className="self-start sm:self-auto">
+              <StockBadge status={stock} lang={lang} />
+            </div>
           </div>
 
           {/* Choosable Gram / Package Pills */}
           {hasVariants && (
-            <div className="mt-2.5 flex flex-wrap items-center gap-1.5" role="group" aria-label="Available package sizes">
+            <div className="mt-2 sm:mt-2.5 flex flex-wrap items-center gap-1 sm:gap-1.5" role="group" aria-label="Available package sizes">
               {variants.map((v) => {
                 const isSelected = v.id === selectedVariant?.id;
                 const pillLabel = formatVariantPill(pick(lang, v.label_en, v.label_ta).text);
@@ -132,7 +134,7 @@ export function ProductCard({
                     key={v.id}
                     type="button"
                     onClick={() => setSelectedVariantId(v.id)}
-                    className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                    className={`rounded-lg px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-bold transition-all ${
                       isSelected
                         ? "bg-[#ffc107] text-[#1c2c1e] shadow-sm border border-[#e0a800] ring-1 ring-[#ffc107]/50"
                         : "bg-white text-[var(--color-ink)] border border-neutral-300 hover:border-[var(--color-forest-700)] hover:bg-[var(--color-ivory)]"
@@ -149,12 +151,14 @@ export function ProductCard({
         </div>
 
         {/* Action buttons */}
-        <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className="mt-3 flex flex-col gap-1.5 sm:grid sm:grid-cols-2 sm:gap-2">
           <Link
             href={href}
-            className={`btn btn-outline !min-h-10 ${lang === "ta" ? "!px-2 text-xs font-bold" : "!px-3 text-sm"}`}
+            className={`btn btn-outline !min-h-9 sm:!min-h-10 w-full ${
+              lang === "ta" ? "!px-2 text-xs font-bold" : "!px-2.5 sm:!px-3 text-xs sm:text-sm"
+            }`}
           >
-            {t.common.viewDetails}
+            <span className="truncate">{t.common.viewDetails}</span>
           </Link>
           <AddToCartButton
             productId={product.id}
@@ -167,6 +171,7 @@ export function ProductCard({
             }
             disabled={isOutOfStock}
             compact
+            className="w-full"
           />
         </div>
       </div>

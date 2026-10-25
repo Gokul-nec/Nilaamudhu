@@ -51,7 +51,7 @@ export function CategoryCardList({
       initial="hidden"
       whileInView="show"
       viewport={{ once: true, margin: "-40px" }}
-      className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4"
+      className="mt-8 grid grid-cols-2 gap-2.5 sm:gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4"
     >
       {categories.map((c) => {
         const name = pick(lang, c.name_en, c.name_ta);
@@ -64,10 +64,10 @@ export function CategoryCardList({
           >
             <Link
               href={`/products?category=${c.slug}`}
-              className="group flex flex-col items-center gap-3 rounded-[var(--radius-card-lg)] p-5 text-center transition-all duration-300 hover:bg-[var(--color-ivory)] hover:shadow-[var(--shadow-lift)]"
+              className="group flex flex-col items-center gap-2 sm:gap-3 rounded-[var(--radius-card-lg)] p-3 sm:p-5 text-center transition-all duration-300 hover:bg-[var(--color-ivory)] hover:shadow-[var(--shadow-lift)]"
             >
               {/* Round image with overflow hidden frame */}
-              <div className="relative h-24 w-24 overflow-hidden rounded-full border-4 border-[var(--color-sand)] bg-[var(--color-ivory)] shadow-md transition-all duration-500 group-hover:scale-105 group-hover:border-[var(--color-gold-500)] sm:h-28 sm:w-28">
+              <div className="relative h-20 w-20 sm:h-28 sm:w-28 overflow-hidden rounded-full border-3 sm:border-4 border-[var(--color-sand)] bg-[var(--color-ivory)] shadow-md transition-all duration-500 group-hover:scale-105 group-hover:border-[var(--color-gold-500)]">
                 {src ? (
                   <Image
                     src={src}
@@ -78,11 +78,11 @@ export function CategoryCardList({
                   />
                 ) : (
                   <div className="grid h-full place-items-center text-[var(--color-forest-700)]/60">
-                    <Wheat className="h-10 w-10" aria-hidden="true" />
+                    <Wheat className="h-8 w-8 sm:h-10 sm:w-10" aria-hidden="true" />
                   </div>
                 )}
               </div>
-              <p className="font-semibold text-[var(--color-ink)] leading-snug transition-colors duration-300 group-hover:text-[var(--color-forest-900)]">
+              <p className="font-semibold text-xs sm:text-base text-[var(--color-ink)] leading-snug transition-colors duration-300 group-hover:text-[var(--color-forest-900)] line-clamp-2">
                 {name.text}
               </p>
             </Link>
